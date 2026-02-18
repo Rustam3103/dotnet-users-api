@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using UsersApi.Models;
 using System.Collections.Generic;
+using UsersApi.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace UsersApi.Controllers
 {
@@ -9,58 +10,58 @@ namespace UsersApi.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private static List<User> users = new List<User>();
+        private readonly UsersDbContext _context;
+
+        public UsersController(UsersDbContext context)
+        {
+            _context = context;
+        }
        
 
         [HttpGet]
-        public ActionResult<List<User>> GetUsers()
+        public async Task<ActionResult<List<User>>>  GetUsers()
         {
-            return Ok(users);
+            return await _context.Users.ToListAsync();
         }
 
         [HttpPost]
-        public ActionResult<User> AddUser(User user)
+        public async Task<ActionResult<User>> AddUser(User user)
         {
-            if (user == null)
-            {
-                return BadRequest("400");
-            }
-            else
-            {
-                users.Add(user);
-                return Ok(user);
-            }
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<User> GetUser(int id)
+        public async Task<ActionResult<User>> GetUser(int id)
         {
-            var selectedUser = users.FirstOrDefault(u => u.Id == id);
-            if (selectedUser == null)
-            {
-                return NotFound("Not Found");
-            }
+            var user = await _context.Users.FindAsync(id);
 
-            return Ok(selectedUser);
+            if (user == null)
+                return NotFound();
+
+            return user;
         }
 
         [HttpDelete("{id}")]
-        public ActionResult<string> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = users.FirstOrDefault(u => u.Id == id);
-            if(user == null)
-            {
-                return NotFound("Not found");
-            }
+            var user = await _context.Users.FindAsync(id);
 
-            users.Remove(user);
-            return Ok("Deleted successfully");
+            if (user == null)
+                return NotFound();
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         [HttpPut("{id}")]
-        public ActionResult<string> EditUser(int id, User incomeUser)
+        public async Task<ActionResult<string>> EditUser(int id, User incomeUser)
         {
-            var isUserExists = users.FirstOrDefault(user => user.Id == id);
+            var isUserExists = await _context.Users.FindAsync(id);
 
             if(isUserExists == null)
             {
@@ -69,6 +70,8 @@ namespace UsersApi.Controllers
 
             isUserExists.Email = incomeUser.Email;
             isUserExists.Name = incomeUser.Name;
+
+            await _context.SaveChangesAsync();
 
             return Ok(isUserExists);
         }
