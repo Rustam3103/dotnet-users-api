@@ -1,8 +1,8 @@
-﻿# .NET Users CRUD API
+# .NET Users CRUD API
 
 A simple ASP.NET Core Web API project implementing basic CRUD operations for managing users.
 
-This project was created to practice backend development with ASP.NET Core and understand routing, controllers, LINQ, and in-memory data handling.
+This project was created to practice backend development with ASP.NET Core and understand routing, controllers, LINQ, working with a real database, and model validation.
 
 ---
 
@@ -18,6 +18,11 @@ The API supports the following operations:
 
 All operations are implemented using REST principles.
 
+Additional behavior:
+
+- ✅ Persisting users in a real database via Entity Framework Core
+- ✅ Model validation via data annotations (e.g. `[Required]`, `[EmailAddress]`)
+
 ---
 
 ## 🛠 Technologies Used
@@ -26,7 +31,8 @@ All operations are implemented using REST principles.
 - ASP.NET Core Web API
 - LINQ
 - Swagger (OpenAPI)
-- In-memory data storage (`List<User>`)
+- Entity Framework Core
+- SQL Server (via connection string `DefaultConnection`)
 
 ---
 
@@ -94,16 +100,14 @@ https://localhost:xxxx/swagger
 
 ## 🧠 Notes
 
-- This project uses in-memory storage (`List<User>`) instead of a database.
-- Data will be reset every time the application restarts.
+- The project now uses a real SQL Server database through Entity Framework Core (see `UsersDbContext` and `DefaultConnection` in `appsettings.json`).
+- Basic model validation is configured using data annotations on the `User` model (for example, required fields and email format).
 - The purpose of this project is educational and focused on backend fundamentals.
 
 ---
 
 ## 📈 Future Improvements
 
-- Connect to a real database (Entity Framework + SQL Server / PostgreSQL)
-- Add validation attributes
 - Add logging
 - Add DTOs
 - Add dependency injection with service layer

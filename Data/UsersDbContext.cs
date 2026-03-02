@@ -11,7 +11,7 @@ namespace UsersApi.Data
         {
 
         }
-
+         
         public DbSet<User> Users { get; set; }
     }
 }
