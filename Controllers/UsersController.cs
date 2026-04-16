@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using UsersApi.Models;
 using System.Collections.Generic;
 using UsersApi.Data;
@@ -11,17 +11,21 @@ namespace UsersApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UsersDbContext _context;
+        private readonly ILogger<UsersController> _logger;
 
-        public UsersController(UsersDbContext context)
+        public UsersController(UsersDbContext context, ILogger<UsersController> logger)
         {
             _context = context;
+            _logger = logger;
         }
-       
 
         [HttpGet]
-        public async Task<ActionResult<List<User>>>  GetUsers()
+        public async Task<ActionResult<List<User>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            _logger.LogInformation("Fetching all users");
+            var users = await _context.Users.ToListAsync();
+            _logger.LogInformation("Returned {Count} users", users.Count);
+            return users;
         }
 
         [HttpPost]
@@ -30,16 +34,21 @@ namespace UsersApi.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Created user with Id {UserId}", user.Id);
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
+            _logger.LogInformation("Fetching user {UserId}", id);
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
+            {
+                _logger.LogWarning("User {UserId} not found", id);
                 return NotFound();
+            }
 
             return user;
         }
@@ -50,31 +59,34 @@ namespace UsersApi.Controllers
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
+            {
+                _logger.LogWarning("Delete failed: user {UserId} not found", id);
                 return NotFound();
+            }
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
-
+            _logger.LogInformation("Deleted user {UserId}", id);
             return NoContent();
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<string>> EditUser(int id, User incomeUser)
+        public async Task<ActionResult<User>> EditUser(int id, User incomeUser)
         {
-            var isUserExists = await _context.Users.FindAsync(id);
+            var existing = await _context.Users.FindAsync(id);
 
-            if(isUserExists == null)
+            if (existing == null)
             {
-               return NotFound("Not found");
+                _logger.LogWarning("Update failed: user {UserId} not found", id);
+                return NotFound("Not found");
             }
 
-            isUserExists.Email = incomeUser.Email;
-            isUserExists.Name = incomeUser.Name;
+            existing.Email = incomeUser.Email;
+            existing.Name = incomeUser.Name;
 
             await _context.SaveChangesAsync();
-
-            return Ok(isUserExists);
+            _logger.LogInformation("Updated user {UserId}", id);
+            return Ok(existing);
         }
-       
     }
 }

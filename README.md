@@ -22,6 +22,7 @@ Additional behavior:
 
 - ✅ Persisting users in a real database via Entity Framework Core
 - ✅ Model validation via data annotations (e.g. `[Required]`, `[EmailAddress]`)
+- ✅ Structured logging (`ILogger<UsersController>`) and HTTP request logging in Development (`AddHttpLogging` / `UseHttpLogging` in `Program.cs`)
 
 ---
 
@@ -43,15 +44,23 @@ UsersApi
 ├── Controllers  
 │   └── UsersController.cs  
 │
+├── Data  
+│   └── UsersDbContext.cs  
+│
 ├── Models  
 │   └── User.cs  
 │
+├── Migrations  
+│
 ├── Program.cs  
 ├── appsettings.json  
+├── appsettings.Development.json  
 └── UsersApi.csproj  
 
 - **Controllers** – Contains API endpoints  
+- **Data** – EF Core `DbContext`  
 - **Models** – Contains data models  
+- **Migrations** – EF Core database schema migrations  
 - **Program.cs** – Application configuration and middleware setup  
 
 ---
@@ -101,6 +110,7 @@ https://localhost:xxxx/swagger
 ## 🧠 Notes
 
 - The project now uses a real SQL Server database through Entity Framework Core (see `UsersDbContext` and `DefaultConnection` in `appsettings.json`).
+- **Logging:** `UsersController` uses `ILogger<UsersController>` for Information/Warning messages on CRUD operations. In Development, `HttpLoggingMiddleware` logs method, path, status code, and duration for each request (see `Program.cs` and `appsettings.Development.json` for `Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware`).
 - Basic model validation is configured using data annotations on the `User` model (for example, required fields and email format).
 - The purpose of this project is educational and focused on backend fundamentals.
 
@@ -108,7 +118,6 @@ https://localhost:xxxx/swagger
 
 ## 📈 Future Improvements
 
-- Add logging
 - Add DTOs
 - Add dependency injection with service layer
 - Add authentication (JWT)
@@ -118,3 +127,4 @@ https://localhost:xxxx/swagger
 ## 👨‍💻 Author
 
 Rustam
+ 
