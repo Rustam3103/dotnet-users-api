@@ -23,6 +23,7 @@ Additional behavior:
 - ✅ Persisting users in a real database via Entity Framework Core
 - ✅ Model validation via data annotations (e.g. `[Required]`, `[EmailAddress]`)
 - ✅ Structured logging (`ILogger<UsersController>`) and HTTP request logging in Development (`AddHttpLogging` / `UseHttpLogging` in `Program.cs`)
+- ✅ DTO-based request/response models for create/update/read operations
 
 ---
 
@@ -47,6 +48,11 @@ UsersApi
 ├── Data  
 │   └── UsersDbContext.cs  
 │
+├── DTOs  
+│   ├── CreateUserDto.cs  
+│   ├── UpdateUserDto.cs  
+│   └── UserDto.cs  
+│
 ├── Models  
 │   └── User.cs  
 │
@@ -59,6 +65,7 @@ UsersApi
 
 - **Controllers** – Contains API endpoints  
 - **Data** – EF Core `DbContext`  
+- **DTOs** – Request/response contracts for API methods  
 - **Models** – Contains data models  
 - **Migrations** – EF Core database schema migrations  
 - **Program.cs** – Application configuration and middleware setup  
@@ -79,7 +86,6 @@ POST /api/users
 Example request body:
 
 {
-  "id": 1,
   "name": "Rustam",
   "email": "test@mail.com"
 }
@@ -111,6 +117,7 @@ https://localhost:xxxx/swagger
 
 - The project now uses a real SQL Server database through Entity Framework Core (see `UsersDbContext` and `DefaultConnection` in `appsettings.json`).
 - **Logging:** `UsersController` uses `ILogger<UsersController>` for Information/Warning messages on CRUD operations. In Development, `HttpLoggingMiddleware` logs method, path, status code, and duration for each request (see `Program.cs` and `appsettings.Development.json` for `Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware`).
+- API endpoints use DTOs (`CreateUserDto`, `UpdateUserDto`, `UserDto`) instead of exposing EF Core entities directly.
 - Basic model validation is configured using data annotations on the `User` model (for example, required fields and email format).
 - The purpose of this project is educational and focused on backend fundamentals.
 
@@ -118,7 +125,6 @@ https://localhost:xxxx/swagger
 
 ## 📈 Future Improvements
 
-- Add DTOs
 - Add dependency injection with service layer
 - Add authentication (JWT)
 

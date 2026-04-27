@@ -3,6 +3,7 @@ using UsersApi.Models;
 using System.Collections.Generic;
 using UsersApi.Data;
 using Microsoft.EntityFrameworkCore;
+using UsersApi.DTOs;
 
 namespace UsersApi.Controllers
 {
@@ -20,26 +21,47 @@ namespace UsersApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<User>>> GetUsers()
+        public async Task<ActionResult<List<UserDto>>> GetUsers()
         {
             _logger.LogInformation("Fetching all users");
             var users = await _context.Users.ToListAsync();
             _logger.LogInformation("Returned {Count} users", users.Count);
-            return users;
+            var result = users.Select(u => new UserDto
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Email = u.Email
+            }).ToList();
+
+            return result;
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> AddUser(User user)
+        public async Task<ActionResult<UserDto>> AddUser(CreateUserDto user)
         {
-            _context.Users.Add(user);
+            var entity = new User
+            {
+                Name = user.Name,
+                Email = user.Email
+            };
+
+            _context.Users.Add(entity);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Created user with Id {UserId}", user.Id);
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            _logger.LogInformation("Created user with Id {UserId}", entity.Id);
+
+            var result = new UserDto
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                Email = entity.Email
+            };
+
+            return CreatedAtAction(nameof(GetUser), new { id = entity.Id }, result);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserDto>> GetUser(int id)
         {
             _logger.LogInformation("Fetching user {UserId}", id);
             var user = await _context.Users.FindAsync(id);
@@ -50,7 +72,14 @@ namespace UsersApi.Controllers
                 return NotFound();
             }
 
-            return user;
+            var result = new UserDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email
+            };
+
+            return result;
         }
 
         [HttpDelete("{id}")]
@@ -71,7 +100,7 @@ namespace UsersApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<User>> EditUser(int id, User incomeUser)
+        public async Task<ActionResult<UserDto>> EditUser(int id, UpdateUserDto incomeUser)
         {
             var existing = await _context.Users.FindAsync(id);
 
@@ -86,7 +115,14 @@ namespace UsersApi.Controllers
 
             await _context.SaveChangesAsync();
             _logger.LogInformation("Updated user {UserId}", id);
-            return Ok(existing);
+            var result = new UserDto
+            {
+                Id = existing.Id,
+                Name = existing.Name,
+                Email = existing.Email
+            };
+
+            return Ok(result);
         }
     }
 }
