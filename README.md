@@ -4,6 +4,8 @@ A simple ASP.NET Core Web API project implementing basic CRUD operations for man
 
 This project was created to practice backend development with ASP.NET Core and understand routing, controllers, LINQ, working with a real database, and model validation.
 
+Current architecture uses a **Controller + Service** approach with dependency injection (`IUserService`/`UserService`) to keep business logic out of controllers.
+
 ---
 
 ## 🚀 Features
@@ -24,6 +26,7 @@ Additional behavior:
 - ✅ Model validation via data annotations (e.g. `[Required]`, `[EmailAddress]`)
 - ✅ Structured logging (`ILogger<UsersController>`) and HTTP request logging in Development (`AddHttpLogging` / `UseHttpLogging` in `Program.cs`)
 - ✅ DTO-based request/response models for create/update/read operations
+- ✅ Service layer with dependency injection (`IUserService` / `UserService`)
 
 ---
 
@@ -56,6 +59,10 @@ UsersApi
 ├── Models  
 │   └── User.cs  
 │
+├── Services
+│   ├── IUserService.cs
+│   └── UserService.cs
+│
 ├── Migrations  
 │
 ├── Program.cs  
@@ -67,6 +74,7 @@ UsersApi
 - **Data** – EF Core `DbContext`  
 - **DTOs** – Request/response contracts for API methods  
 - **Models** – Contains data models  
+- **Services** – Business logic for user CRUD operations (`IUserService` / `UserService`)  
 - **Migrations** – EF Core database schema migrations  
 - **Program.cs** – Application configuration and middleware setup  
 
@@ -85,10 +93,12 @@ POST /api/users
 
 Example request body:
 
+```json
 {
   "name": "Rustam",
   "email": "test@mail.com"
 }
+```
 
 ### Update user
 PUT /api/users/{id}
@@ -102,8 +112,10 @@ DELETE /api/users/{id}
 
 Using .NET CLI:
 
-dotnet restore  
-dotnet run  
+```bash
+dotnet restore
+dotnet run
+```
 
 Swagger UI will be available at:
 
@@ -116,7 +128,8 @@ https://localhost:xxxx/swagger
 ## 🧠 Notes
 
 - The project now uses a real SQL Server database through Entity Framework Core (see `UsersDbContext` and `DefaultConnection` in `appsettings.json`).
-- **Logging:** `UsersController` uses `ILogger<UsersController>` for Information/Warning messages on CRUD operations. In Development, `HttpLoggingMiddleware` logs method, path, status code, and duration for each request (see `Program.cs` and `appsettings.Development.json` for `Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware`).
+- **Layered structure:** `UsersController` delegates CRUD logic to `IUserService` / `UserService`, and the service is registered in DI in `Program.cs` (`AddScoped<IUserService, UserService>()`).
+- **Logging:** Both controller and service use `ILogger<>` for Information/Warning messages. In Development, `HttpLoggingMiddleware` logs method, path, status code, and duration for each request (see `Program.cs` and `appsettings.Development.json` for `Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware`).
 - API endpoints use DTOs (`CreateUserDto`, `UpdateUserDto`, `UserDto`) instead of exposing EF Core entities directly.
 - Basic model validation is configured using data annotations on the `User` model (for example, required fields and email format).
 - The purpose of this project is educational and focused on backend fundamentals.
@@ -125,8 +138,9 @@ https://localhost:xxxx/swagger
 
 ## 📈 Future Improvements
 
-- Add dependency injection with service layer
 - Add authentication (JWT)
+- Add pagination, filtering, and sorting for `GET /api/users`
+- Add unit tests for `UserService` and integration tests for `UsersController`
 
 ---
 
