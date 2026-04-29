@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using UsersApi.DTOs;
 using UsersApi.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UsersApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase

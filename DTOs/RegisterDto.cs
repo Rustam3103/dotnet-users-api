@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace UsersApi.Models
+namespace UsersApi.DTOs
 {
-    public class User
+    public class RegisterDto
     {
-        public int Id { get; set; }
-
         [Required]
         [StringLength(100, MinimumLength = 2)]
         public string Name { get; set; } = string.Empty;
@@ -16,6 +14,7 @@ namespace UsersApi.Models
         public string Email { get; set; } = string.Empty;
 
         [Required]
-        public string PasswordHash { get; set; } = string.Empty;
+        [StringLength(100, MinimumLength = 6)]
+        public string Password { get; set; } = string.Empty;
     }
 }
